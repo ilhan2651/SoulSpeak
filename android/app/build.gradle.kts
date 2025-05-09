@@ -12,7 +12,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.soulspeakma"
+    namespace = "com.example.soul_speak"
     compileSdk = 35
     buildToolsVersion = "35.0.0"
     ndkVersion = "27.0.12077973"

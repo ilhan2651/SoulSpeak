@@ -1,97 +1,169 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:soulspeakma/services/stt_service.dart' show STTService;
-import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:flutter_sound/flutter_sound.dart';
-import 'package:clipboard/clipboard.dart';
+import 'package:record/record.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:clipboard/clipboard.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+
+import '../../services/stt_service.dart';
 
 class STTCommandPage extends StatefulWidget {
-  const STTCommandPage({super.key});
+  const STTCommandPage({Key? key}) : super(key: key);
 
   @override
   State<STTCommandPage> createState() => _STTCommandPageState();
 }
 
 class _STTCommandPageState extends State<STTCommandPage> {
-  final stt.SpeechToText _speech = stt.SpeechToText();
   final FlutterTts _tts = FlutterTts();
-  final FlutterSoundRecorder _recorder = FlutterSoundRecorder();
-  bool _isListening = false;
-  String _recognizedCommand = "";
-  String _resultText = "";
+  final AudioRecorder _recorder = AudioRecorder();
+  final SpeechToText _speech = SpeechToText();
+
+  bool _isRecording = false;
+  String? _recordedFilePath;
+  String _debugText = '';
+  String? _recognizedText;
 
   @override
   void initState() {
     super.initState();
-    // ✅ async işlemleri düzgün başlatmak için microtask kullandık
-    Future.microtask(() async {
-      await _initRecorder();
-      await _speak("Say start to begin recording. Say stop to stop and analyze.");
-    });
+    _initialize();
   }
 
-  Future<void> _initRecorder() async {
-    await Permission.microphone.request();
-    await _recorder.openRecorder();
+  Future<void> _initialize() async {
+    await _tts.setLanguage('en-US');
+    await _tts.setSpeechRate(0.4);
+
+    final micPermission = await Permission.microphone.request();
+    if (!micPermission.isGranted) {
+      await _speakSafe("Microphone permission is required.");
+      return;
+    }
+
+    await _repeatInstructions();
   }
 
-  Future<void> _speak(String text) async {
-    await _tts.speak(text);
+  Future<void> _speakSafe(String text) async {
+    try {
+      await _tts.stop();
+      await Future.delayed(const Duration(milliseconds: 300));
+      await _tts.speak(text);
+      await _tts.awaitSpeakCompletion(true);
+      await Future.delayed(const Duration(milliseconds: 600));
+    } catch (e) {
+      print("TTS error: $e");
+    }
   }
 
-  Future<void> _startListening() async {
-    await _speech.listen(onResult: (result) {
-      setState(() {
-        _recognizedCommand = result.recognizedWords.toLowerCase();
-      });
-      if (_recognizedCommand.contains("start")) {
-        _speak("Recording started");
-        _startRecording();
-      } else if (_recognizedCommand.contains("stop")) {
-        _speak("Recording stopped and analyzing");
-        _stopRecordingAndAnalyze();
-      }
-    });
-    setState(() => _isListening = true);
-  }
-
-  Future<void> _stopListening() async {
-    await _speech.stop();
-    setState(() => _isListening = false);
+  Future<void> _repeatInstructions() async {
+    await _speakSafe("Long press to start recording.");
+    await _speakSafe("Long press again to stop and send.");
   }
 
   Future<void> _startRecording() async {
     final dir = await getTemporaryDirectory();
-    String path = "${dir.path}/temp_audio.wav";
-    await _recorder.startRecorder(toFile: path);
+    _recordedFilePath = '${dir.path}/rec_${DateTime.now().millisecondsSinceEpoch}.wav';
+
+    await _recorder.start(
+      const RecordConfig(encoder: AudioEncoder.wav, bitRate: 128000, sampleRate: 16000),
+      path: _recordedFilePath!,
+    );
+
+    setState(() {
+      _isRecording = true;
+      _debugText = '🎙️ Recording started: $_recordedFilePath';
+    });
+
+    await _speakSafe("Recording started. You can speak now.");
   }
 
-  Future<void> _stopRecordingAndAnalyze() async {
-    final path = await _recorder.stopRecorder();
-    if (path == null) return;
-    final file = File(path);
-    final result = await STTService().analyzeAudio(file);
-    if (result != null && result["text"] != null) {
+  Future<void> _stopRecording() async {
+    final path = await _recorder.stop();
+    setState(() => _isRecording = false);
+
+    await _speakSafe("Recording stopped.");
+    await _speakSafe("Sending to server.");
+
+    if (path != null && File(path).existsSync()) {
+      final file = File(path);
+      final fileSize = await file.length();
+
+      setState(() => _debugText = 'Recorded file size: $fileSize bytes');
+
+      if (fileSize < 4000) {
+        await _speakSafe("The recording was too short. Please try again.");
+        return;
+      }
+
+      final result = await STTService().analyzeAudio(file);
+      final text = result?['text'] ?? 'Could not understand.';
+
       setState(() {
-        _resultText = result["text"];
+        _recognizedText = text;
+        _debugText = '📝 Text: $text';
       });
-      _speak(_resultText);
+
+      await _speakSafe("Analysis complete.");
+
+      final txtFile = await _saveTextFile(text);
+
+      await _speakSafe("What do you want to do with the result?");
+      await _speakSafe("Say share, save or copy.");
+
+      final action = await _listenForCommand();
+
+      if (action == "share") {
+        await Share.shareXFiles([XFile(txtFile.path)], text: "Here is the recognized text.");
+      } else if (action == "copy") {
+        await FlutterClipboard.copy(text);
+        await _speakSafe("Text copied to clipboard.");
+      } else if (action == "save") {
+        await _speakSafe("Text saved.");
+      } else {
+        await _speakSafe("No valid command detected.");
+      }
+
+      await _repeatInstructions();
     } else {
-      _speak("Sorry, could not understand.");
+      await _speakSafe("No valid recording found.");
+      await _repeatInstructions();
     }
   }
 
-  @override
-  void dispose() {
-    _speech.stop();
-    _tts.stop();
-    _recorder.closeRecorder();
-    super.dispose();
+  Future<File> _saveTextFile(String text) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/recognized_${DateTime.now().millisecondsSinceEpoch}.txt');
+    await file.writeAsString(text);
+    return file;
+  }
+
+  Future<String?> _listenForCommand() async {
+    bool available = await _speech.initialize();
+    if (!available) return null;
+
+    String command = '';
+    await _speech.listen(
+      onResult: (result) {
+        command = result.recognizedWords.toLowerCase().trim();
+      },
+      listenMode: ListenMode.confirmation,
+      pauseFor: const Duration(seconds: 2),
+      partialResults: false,
+      localeId: 'en_US',
+    );
+
+    await Future.delayed(const Duration(seconds: 5));
+    await _speech.stop();
+
+    if (command.contains("share")) return "share";
+    if (command.contains("save")) return "save";
+    if (command.contains("copy")) return "copy";
+    return null;
   }
 
   @override
@@ -99,48 +171,44 @@ class _STTCommandPageState extends State<STTCommandPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF36EEE0),
       appBar: AppBar(
-        title: const Text("Voice Assistant"),
+        title: const Text('Voice Assistant'),
         backgroundColor: Colors.teal,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text("Recognized Command: $_recognizedCommand", style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 10),
-            const Text("Result Text:", style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text(_resultText, style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _isListening ? _stopListening : _startListening,
-              child: Text(_isListening ? "Stop Listening" : "Start Listening"),
-            ),
-            const SizedBox(height: 10),
-            if (_resultText.isNotEmpty)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.copy),
-                    label: const Text("Copy"),
-                    onPressed: () {
-                      FlutterClipboard.copy(_resultText);
-                      _speak("Copied to clipboard");
-                    },
-                  ),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.share),
-                    label: const Text("Share"),
-                    onPressed: () {
-                      Share.share(_resultText);
-                    },
-                  ),
-                ],
-              )
-          ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPress: () async {
+          if (_isRecording) {
+            await _stopRecording();
+          } else {
+            await _startRecording();
+          }
+        },
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _isRecording
+                    ? '🎙️ Recording... Long press to stop.'
+                    : '▶️ Long press to start recording.',
+                style: const TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                _debugText,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _tts.stop();
+    _speech.stop();
+    super.dispose();
   }
 }

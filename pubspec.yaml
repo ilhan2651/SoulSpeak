@@ -14,7 +14,7 @@ dependencies:
   http: ^1.3.0
   shared_preferences: ^2.2.2
   speech_to_text: ^7.0.0
-  flutter_tts: ^3.5.2
+  flutter_tts: ^3.8.4
   cupertino_icons: ^1.0.8
   video_player: ^2.9.3
   permission_handler: ^11.0.1
@@ -26,10 +26,11 @@ dependencies:
   audio_session: ^0.1.15
   file_selector: ^1.0.3
   jwt_decode: ^0.3.1
-  record: ^5.0.4
+  record: ^6.0.0
   share_plus: ^7.2.1
   clipboard: ^0.1.3
   flutter_sound: ^9.2.13+1
+
 
 
 dev_dependencies:

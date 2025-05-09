@@ -1,22 +1,25 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:http_parser/http_parser.dart';
 
 class STTService {
   final Dio _dio = Dio();
   final String _baseUrl = "http://192.168.0.3:8000";
 
-  /// Hem File hem XFile destekler
   Future<Map<String, dynamic>?> analyzeAudio(dynamic file) async {
     try {
-      // path ve dosya adı belirle
       final String path = file.path;
       final String name = file is XFile
           ? file.name
           : path.split(Platform.pathSeparator).last;
 
       final formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(path, filename: name),
+        "file": await MultipartFile.fromFile(
+          path,
+          filename: name,
+          contentType: MediaType("audio", "wav"),
+        ),
       });
 
       final response = await _dio.post(
