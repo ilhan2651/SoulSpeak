@@ -33,6 +33,7 @@ dependencies:
 
 
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -54,9 +55,10 @@ flutter:
 dependency_overrides:
   ffi: ^2.0.1
 
-plugin:
-  platforms:
-    android:
-      default_package: file_picker
-    ios:
-      default_package: file_picker
+# ❌ Gerekli değilse bunu silebilirsin, sadece plugin geliştirirken kullanılır
+# plugin:
+#   platforms:
+#     android:
+#       default_package: file_picker
+#     ios:
+#       default_package: file_picker

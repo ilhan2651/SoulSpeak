@@ -1,10 +1,3 @@
-// ✅ Updated app/build.gradle.kts
-gradle.projectsEvaluated {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "11"
-    }
-}
-
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -17,15 +10,6 @@ android {
     buildToolsVersion = "35.0.0"
     ndkVersion = "27.0.12077973"
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
-    }
-
     defaultConfig {
         applicationId = "com.example.soul_speak"
         minSdk = 24
@@ -35,12 +19,28 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 
 flutter {
     source = "../.."
+}
+
+// JVM hedefini ayarla
+gradle.projectsEvaluated {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = "11"
+    }
 }

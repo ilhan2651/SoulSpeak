@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:soulspeakma/screens/visually_impaired/stt_command_page.dart';
+import 'package:soulspeakma/screens/hard_hearing_impaired/speech_to_text_page.dart';
+import 'package:soulspeakma/screens/splash_screen.dart';
 
 
 void main() {
@@ -30,7 +32,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
         useMaterial3: true,
       ),
-      home: const STTCommandPage(),
+      home: const SpeechToTextPage(),
     );
   }
 }

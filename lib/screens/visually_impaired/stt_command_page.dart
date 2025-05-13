@@ -25,6 +25,7 @@ class _STTCommandPageState extends State<STTCommandPage> {
   final SpeechToText _speech = SpeechToText();
 
   bool _isRecording = false;
+  bool _isProcessing = false;
   String? _recordedFilePath;
   String _debugText = '';
   String? _recognizedText;
@@ -62,7 +63,7 @@ class _STTCommandPageState extends State<STTCommandPage> {
 
   Future<void> _repeatInstructions() async {
     await _speakSafe("Long press to start recording.");
-    await _speakSafe("Long press again to stop and send.");
+    await _speakSafe("Long press again to stop and choose an action.");
   }
 
   Future<void> _startRecording() async {
@@ -86,6 +87,8 @@ class _STTCommandPageState extends State<STTCommandPage> {
     final path = await _recorder.stop();
     setState(() => _isRecording = false);
 
+    _isProcessing = true;
+
     await _speakSafe("Recording stopped.");
     await _speakSafe("Sending to server.");
 
@@ -97,6 +100,7 @@ class _STTCommandPageState extends State<STTCommandPage> {
 
       if (fileSize < 4000) {
         await _speakSafe("The recording was too short. Please try again.");
+        _isProcessing = false;
         return;
       }
 
@@ -119,6 +123,7 @@ class _STTCommandPageState extends State<STTCommandPage> {
 
       if (action == "share") {
         await Share.shareXFiles([XFile(txtFile.path)], text: "Here is the recognized text.");
+        await _speakSafe("Text shared.");
       } else if (action == "copy") {
         await FlutterClipboard.copy(text);
         await _speakSafe("Text copied to clipboard.");
@@ -126,11 +131,15 @@ class _STTCommandPageState extends State<STTCommandPage> {
         await _speakSafe("Text saved.");
       } else {
         await _speakSafe("No valid command detected.");
+        _isProcessing = false;
+        return;
       }
 
+      _isProcessing = false;
       await _repeatInstructions();
     } else {
       await _speakSafe("No valid recording found.");
+      _isProcessing = false;
       await _repeatInstructions();
     }
   }
@@ -147,18 +156,25 @@ class _STTCommandPageState extends State<STTCommandPage> {
     if (!available) return null;
 
     String command = '';
-    await _speech.listen(
-      onResult: (result) {
-        command = result.recognizedWords.toLowerCase().trim();
-      },
-      listenMode: ListenMode.confirmation,
-      pauseFor: const Duration(seconds: 2),
-      partialResults: false,
-      localeId: 'en_US',
-    );
 
-    await Future.delayed(const Duration(seconds: 5));
-    await _speech.stop();
+    while (command.isEmpty) {
+      await _speech.listen(
+        onResult: (result) {
+          command = result.recognizedWords.toLowerCase().trim();
+        },
+        listenMode: ListenMode.confirmation,
+        pauseFor: const Duration(seconds: 2),
+        partialResults: false,
+        localeId: 'en_US',
+      );
+
+      await Future.delayed(const Duration(seconds: 5));
+      await _speech.stop();
+
+      if (command.isEmpty) {
+        await _speakSafe("I didn’t hear anything. Listening again.");
+      }
+    }
 
     if (command.contains("share")) return "share";
     if (command.contains("save")) return "save";
@@ -177,6 +193,8 @@ class _STTCommandPageState extends State<STTCommandPage> {
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onLongPress: () async {
+          if (_isProcessing) return;
+
           if (_isRecording) {
             await _stopRecording();
           } else {
