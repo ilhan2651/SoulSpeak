@@ -16,6 +16,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
+
+        // ✅ MULTIDEX DESTEKLİ
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -43,4 +46,9 @@ gradle.projectsEvaluated {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "11"
     }
+}
+
+// ✅ MULTIDEX BAĞIMLILIĞI
+dependencies {
+    implementation("androidx.multidex:multidex:2.0.1")
 }

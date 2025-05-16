@@ -8,7 +8,7 @@ class TTSService {
   final Dio _dio = Dio();
 
   // 📌 Emülatör kullanıyorsan bu IP sabit: 10.0.2.2 (localhost yerine geçer)
-  final String _baseUrl = "http://192.168.0.3:8000";
+  final String _baseUrl = "http://192.168.1.83:8000";
 
   /// Metni REST API'ye gönderip, gelen MP3 dosyasını indirip geçici klasöre kaydeder
   Future<String?> convertTextToSpeech(String text) async {

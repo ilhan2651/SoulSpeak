@@ -144,7 +144,7 @@ class AuthService {
 
     if (token != null) {
       await http.post(
-        Uri.parse('http://192.168.0.3:5298/api/auth/logout'),
+        Uri.parse('http://192.168.1.83:5298/api/auth/logout'),
         headers: {
           'Authorization': 'Bearer $token',
         },

@@ -5,7 +5,7 @@ import 'package:http_parser/http_parser.dart';
 
 class STTService {
   final Dio _dio = Dio();
-  final String _baseUrl = "http://192.168.0.3:8000";
+  final String _baseUrl = "http://192.168.1.83:8000";
 
   Future<Map<String, dynamic>?> analyzeAudio(dynamic file) async {
     try {

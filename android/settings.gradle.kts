@@ -24,3 +24,5 @@ plugins {
 }
 
 include(":app")
+include(":soul_speak")
+project(":soul_speak").projectDir = file("soul_speak")
