@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soulspeakma/screens/hard_hearing_impaired/home_page_hard_hearing_impaired.dart';
-import 'package:soulspeakma/screens/hard_hearing_impaired/starter_page.dart';
-import 'package:soulspeakma/screens/visually_impaired/starter_page_visually_impaired.dart';
+import 'package:soulspeakma/screens/visually_impaired/router_voice_command_page.dart';
 
 import '../services/auth_service.dart';
 import 'DisabilitySelectionPage.dart';
@@ -49,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
           print("🚀 Kullanıcı StarterPageVisuallyImpaired'e yönlendiriliyor...");
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => StarterPageVisuallyImpaired()),
+            MaterialPageRoute(builder: (context) => RouterVoiceCommandPage()),
           );
         } else if (disabilityType == "HardHearingImpaired") {
           print("🚀 Kullanıcı StarterPageHardHearingImpaired'e yönlendiriliyor...");

@@ -1,18 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:soulspeakma/screens/hard_hearing_impaired/home_page_hard_hearing_impaired.dart';
 import 'package:soulspeakma/screens/hard_hearing_impaired/profile_page.dart';
-import 'package:soulspeakma/screens/hard_hearing_impaired/settings_page.dart';
 import 'package:soulspeakma/screens/hard_hearing_impaired/speech_to_text_page.dart';
 import 'package:soulspeakma/screens/hard_hearing_impaired/tts_text_page.dart';
 
 import 'hard_hearing_impaired/saved_records_page.dart';
-
-// import 'text_to_speech_page.dart';
-// import 'speech_to_text_page.dart';
-// import 'home_page.dart';
-// import 'transcript_page.dart';
-// import 'profile_page.dart';
-// import 'settings_page.dart';
 
 class BaseScaffold extends StatelessWidget {
   final Widget body;
@@ -47,7 +39,7 @@ class BaseScaffold extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 8),
-            // FAB'lar
+            // FAB'lar (2 tane)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -69,14 +61,13 @@ class BaseScaffold extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            // Alt bar ikonları
+            // Alt bar ikonları (3 tane, SettingsPage çıkarıldı)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildBottomIcon(context, Icons.home, HomePageHardHearing()),
                 _buildBottomIcon(context, Icons.text_snippet, SavedRecordsPage()),
                 _buildBottomIcon(context, Icons.person, ProfilePage()),
-                _buildBottomIcon(context, Icons.settings, SettingsPage()),
               ],
             ),
             const SizedBox(height: 8),

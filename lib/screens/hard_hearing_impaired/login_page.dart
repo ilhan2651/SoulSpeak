@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:soulspeakma/screens/hard_hearing_impaired/home_page_hard_hearing_impaired.dart';
-import 'package:soulspeakma/screens/hard_hearing_impaired/starter_page.dart';
 
 import '../../services/auth_service.dart';
 
@@ -20,7 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () async => false, // geri tuşunu engelle
+        onWillPop: () async => false,
     child: Scaffold(
       backgroundColor: Color(0xFF36EEE0),
       body: SingleChildScrollView(

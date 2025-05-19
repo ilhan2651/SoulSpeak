@@ -49,7 +49,7 @@ class _SavedRecordsPageState extends State<SavedRecordsPage> {
               child: ListTile(
                 title: Text(record.name),
                 subtitle: Text(
-                  "Date: ${record.date.toLocal().toString().split(' ')[0]}", // Sadece tarihi gösteriyoruz
+                  "Date: ${record.date.toLocal().toString().split(' ')[0]}",
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),

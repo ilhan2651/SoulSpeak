@@ -161,7 +161,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     String confirmPassword = _confirmPasswordController.text.trim();
-    // Engel tipi sabit "Hard Hearing Impaired" çünkü bu sayfaya geliyorsa o mod seçilmiş demektir.
     String disabilityType = "Hard Hearing Impaired";
 
     print("📌 Registration started: $name, $email, $password, $confirmPassword, $disabilityType");

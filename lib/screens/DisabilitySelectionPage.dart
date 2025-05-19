@@ -20,15 +20,13 @@ class _DisabilitySelectionPageState extends State<DisabilitySelectionPage> {
     _delayedVoiceGuidance();
   }
 
-  // 🌟 Configure TTS (Text-to-Speech)
   Future<void> _configureTTS() async {
-    await _tts.setLanguage("en-US"); // English Language
-    await _tts.setSpeechRate(0.4); // Slower speech
-    await _tts.setPitch(1.0); // Keep speech pitch normal
-    print("✅ TTS Configured!"); // Debugging purpose
+    await _tts.setLanguage("en-US");
+    await _tts.setSpeechRate(0.4);
+    await _tts.setPitch(1.0);
+    print("✅ TTS Configured!");
   }
 
-  // 🌟 Start voice guidance after 1 second delay
   void _delayedVoiceGuidance() {
     Future.delayed(Duration(seconds: 1), () {
       _speak(
@@ -47,9 +45,8 @@ class _DisabilitySelectionPageState extends State<DisabilitySelectionPage> {
     await _tts.speak(text);
   }
 
-  // Handle user selection (Will be saved in RegistrationPage)
   Future<void> _selectDisability(String type) async {
-    _timer?.cancel(); // Stop voice guidance
+    _timer?.cancel();
 
     String confirmationMessage = type == "VisuallyImpaired"
         ? "Visually Impaired Mode selected. Redirecting to VP Registration Page."
@@ -61,12 +58,12 @@ class _DisabilitySelectionPageState extends State<DisabilitySelectionPage> {
       if (type == "VisuallyImpaired") {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => RegistrationPageVisuallyImpaired()), // VPRegister sayfasına yönlendirme
+          MaterialPageRoute(builder: (context) => RegistrationPageVisuallyImpaired()),
         );
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => RegistrationPage()), // Normal kayıt sayfasına yönlendirme
+          MaterialPageRoute(builder: (context) => RegistrationPage()),
         );
       }
     });
@@ -75,7 +72,7 @@ class _DisabilitySelectionPageState extends State<DisabilitySelectionPage> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // Stop voice guidance when leaving
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -89,7 +86,6 @@ class _DisabilitySelectionPageState extends State<DisabilitySelectionPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 🔹 Top half (For Visually Impaired)
               Expanded(
                 child: GestureDetector(
                   onTap: () {
@@ -107,7 +103,6 @@ class _DisabilitySelectionPageState extends State<DisabilitySelectionPage> {
                 ),
               ),
 
-              // 🔹 Logo - Centered
               Center(
                 child: Semantics(
                   label: "Application Logo. Non-clickable.",
@@ -119,7 +114,6 @@ class _DisabilitySelectionPageState extends State<DisabilitySelectionPage> {
                 ),
               ),
 
-              // 🔹 Bottom half (For Hard Hearing Impaired)
               Expanded(
                 child: GestureDetector(
                   onTap: () {
@@ -139,7 +133,6 @@ class _DisabilitySelectionPageState extends State<DisabilitySelectionPage> {
             ],
           ),
 
-          // 🔹 Information text at the bottom
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(

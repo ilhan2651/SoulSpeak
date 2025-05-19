@@ -31,6 +31,7 @@ class _TextToSpeechPageState extends State<TextToSpeechPage> {
   bool _isSpeakingOrPlaying = false;
   bool _isReadingNow = false;
   bool _isGivingInstruction = false;
+  bool _hasGivenGoBackInstruction = false;  // Başlangıçta sadece 1 kere söylemek için flag
 
   @override
   void initState() {
@@ -48,9 +49,12 @@ class _TextToSpeechPageState extends State<TextToSpeechPage> {
       return;
     }
     await _speech.stop();
+
     _isGivingInstruction = true;
-    await _speakSafe("Welcome to Text to Speech. Say 'file' to read a file or 'clipboard' to paste text.");
+    await _speakSafe("Welcome to Text to Speech. Say 'file' to read a file, 'clipboard' to paste text, or say 'go back' to return to the router page .");
+    _hasGivenGoBackInstruction = true;
     _isGivingInstruction = false;
+
     _startLoop();
   }
 
@@ -86,6 +90,13 @@ class _TextToSpeechPageState extends State<TextToSpeechPage> {
 
     print("Algılandı: $command");
 
+    // Eğer kullanıcı 'go back' dediyse
+    if (command.contains("go back") || command.contains("back")) {
+      await _speakSafe("Returning to router page.");
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+
     if (_matchesFileCommand(command)) {
       if (_hasConvertedOnce) {
         await _speakSafe("This will override the previous audio file.");
@@ -112,9 +123,10 @@ class _TextToSpeechPageState extends State<TextToSpeechPage> {
       }
     } else {
       if (_hasConvertedOnce) {
-        await _speakSafe("Command not recognized. You can say 'share', 'replay', or start a new conversion with 'file' or 'clipboard'.");
+        // Komut geçerli değilse yine "go back" komutu da dahil hatırlatılır
+        await _speakSafe("Command not recognized. You can say 'share', 'replay', 'go back', or start a new conversion with 'file' or 'clipboard'.");
       } else {
-        await _speakSafe("Command not recognized. Please say 'file' or 'clipboard' to start.");
+        await _speakSafe("Command not recognized. Please say 'file' or 'clipboard' to start, or say 'go back' to return.");
       }
     }
   }
@@ -146,7 +158,7 @@ class _TextToSpeechPageState extends State<TextToSpeechPage> {
 
       if (resultText.isEmpty) {
         final prompt = attempt % 3 == 0
-            ? "Please say file or clipboard."
+            ? "Please say file, clipboard or go back."
             : "Listening again.";
         _isGivingInstruction = true;
         await _speakSafe(prompt);

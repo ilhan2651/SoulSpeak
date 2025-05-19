@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:soulspeakma/screens/visually_impaired/router_voice_command_page.dart';
 import 'package:soulspeakma/screens/visually_impaired/stt_command_page.dart' show STTCommandPage;
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:http/http.dart' as http;
@@ -116,6 +117,7 @@ class _LoginPageVisuallyImpairedState extends State<LoginPageVisuallyImpaired> {
       final lower = speech.toLowerCase();
       if (lower.contains("yes")) {
         final normalized = _normalize(_tempInput, _currentStep);
+        print("Normalized input for step '$_currentStep': $normalized");
         if (_currentStep == "email") {
           _emailController.text = normalized;
           _currentStep = "password";
@@ -176,7 +178,7 @@ class _LoginPageVisuallyImpairedState extends State<LoginPageVisuallyImpaired> {
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const STTCommandPage()),
+          MaterialPageRoute(builder: (_) => const RouterVoiceCommandPage()),
         );
       } else {
         final data = jsonDecode(resp.body);

@@ -8,13 +8,13 @@ class HomePageHardHearing extends StatelessWidget {
   Widget build(BuildContext context) {
     return BaseScaffold(
       body: SafeArea(
-        child: SingleChildScrollView( // ✅ Kaydırma eklendi
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 🔹 Welcome görseli
+
                 Padding(
                   padding: const EdgeInsets.only(left: 40, top: 16),
                   child: Image.asset(
@@ -24,7 +24,6 @@ class HomePageHardHearing extends StatelessWidget {
                   ),
                 ),
 
-                // 🔹 Ok görseli
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 40, bottom: 40),

@@ -1,4 +1,3 @@
-// lib/models/saved_record.dart
 
 class SavedRecord {
   final String name;
